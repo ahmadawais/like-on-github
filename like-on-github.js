@@ -271,7 +271,7 @@
 		appendDataBefore: function (dataToAppend, content) {
 			// If the file is empty.
 			if (content.trim().length === 0) {
-				content += '# today-i-liked \nContent that I liked. Saved using https://goo.gl/Wj595G \n';
+				content += '';
 			}
 
 			const arr = content.split('###');
@@ -301,7 +301,7 @@
 		 * @returns {string}
 		 */
 		getDateHeader: function () {
-			return `\n### ${Repo.getCurrentDate()} \n`;
+			return `\n### ${Repo.getCurrentDate()}\n`;
 		},
 
 		/**
