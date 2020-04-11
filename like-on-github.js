@@ -1,13 +1,22 @@
 /**
- * LikeOnGitHub
+ * LikeOnGitHub.
  *
- * This file is part of the LikeOnGitHub; an open-source Google Chrome extension
- * http://github.com/idnan/like-on-github
- *
- * MIT (c) Adnan Ahmed <mahradnan@hotmail.com>
+ * @link https://github.com/ahmadawais/like-on-github
  */
 (function () {
 	var Helper = {
+		/**
+		 * Get meta description.
+		 */
+		getMetaDescription: function () {
+			var metas = document.getElementsByTagName('meta');
+			for (var i in metas) {
+				if (typeof metas[i].name != 'undefined' && metas[i].name.toLowerCase() == 'description') {
+					return metas[i].content;
+				}
+			}
+			return '';
+		},
 		/**
 		 * Hides the log on github popup
 		 */
@@ -22,6 +31,7 @@
 
 			$(Config.EX_COTAINER).hide();
 			$(Config.EX_INPUT_TITLE).val('');
+			$(Config.EX_INPUT_DESC).val('');
 			$(Config.EX_INPUT_URL).val('');
 			$(Config.EX_INPUT_COMMENT).val('');
 
@@ -34,8 +44,8 @@
 		showPopup: function () {
 			let $container = $(Config.EX_COTAINER);
 
-			// Some pages remove the tab switcher HTML by chance
-			// so we check if the tab switcher was found and we re append if it is not found
+			// Some pages remove the tab switcher HTML by chance.
+			// So we check if the tab switcher was found and we re append if it is not found.
 			if ($container.length === 0) {
 				appendLikeOnGithubHtml(Config.EX_CONTAINER_BODY);
 				$container = $(Config.EX_COTAINER);
@@ -59,9 +69,10 @@
 		 */
 		isFormValid: function () {
 			let title = $(Config.EX_INPUT_TITLE).val().trim(),
+				desc = $(Config.EX_INPUT_DESC).val().trim(),
 				comment = $(Config.EX_INPUT_COMMENT).val().trim();
 
-			return !!(title && comment);
+			return !!(title && desc && comment);
 		},
 	};
 
@@ -93,33 +104,38 @@
 	 * @type {Object}
 	 */
 	var Config = {
-		// Templates
-		MAIN_TEMPLATE:
-			'<div class="logh">' +
-			'<h3>Like On GitHub</h3>' +
-			'<div class="clogl">' +
-			'<div class="lbllogh"><span class="reqlogh">*</span>Title (label for the link)</div>' +
-			'<input type="text" name="title">' +
-			'</div>' +
-			'<div class="clogl">' +
-			'<input type="hidden" name="url">' +
-			'</div>' +
-			'<div class="clogl">' +
-			'<div class="lbllogh"><span class="reqlogh">*</span>Comment (commit message)</div>' +
-			'<textarea name="comment"></textarea>' +
-			'</div>' +
-			'<div id="action-btns">' +
-			'<div class="btn btn-primary" id="logh_btn_save">Save</div>' +
-			'<div class="btn" id="logh_btn_cancel">Cancel</div>' +
-			'</div>' +
-			'<div class="elogh hlogh">' +
-			'<p></p>' +
-			'</div>' +
-			'</div>',
+		// Templates.
+		MAIN_TEMPLATE: `
+<div class="logh">
+	<h3>Like On Github</h3>
+	<div class="clogl">
+		<div class="lbllogh">Title</div>
+		<input type="text" name="title" />
+	</div>
+	<div class="clogl">
+		<div class="lbllogh">Description</div>
+		<textarea name="desc"></textarea>
+	</div>
+	<div class="clogl">
+		<input type="hidden" name="comment" />
+	</div>
+	<div class="clogl">
+		<input type="hidden" name="url" />
+	</div>
+	<div id="action-btns">
+		<div class="btn btn-primary" id="logh_btn_save">Save</div>
+		<div class="btn" id="logh_btn_cancel">Cancel</div>
+	</div>
+	<div class="elogh hlogh">
+		<p></p>
+	</div>
+</div>
+`,
 
-		// References to DOM elements
+		// References to DOM elements.
 		EX_COTAINER: '.logh',
 		EX_INPUT_TITLE: '.logh input[name="title"]',
+		EX_INPUT_DESC: '.logh textarea[name="desc"]',
 		EX_INPUT_URL: '.logh input[name="url"]',
 		EX_INPUT_COMMENT: '.logh textarea[name="comment"]',
 		EX_CONTAINER_BODY: 'body',
@@ -128,13 +144,14 @@
 		EX_ERROR_CONTAINER: '.logh .elogh',
 		EX_ERROR_LINE: '.logh .elogh p',
 
-		// Shortcut for activation
+		// Shortcut for activation.
 		MASTER_KEY: '⌘+⇧+l, ⌃+⇧+l',
 
-		// Key codes for certain actions
+		// Key codes for certain actions.
 		ESCAPE_KEY: 27,
+		ENTER_KEY: 13,
 
-		// REPO
+		// REPO.
 		BASE_URL: 'https://api.github.com/repos',
 	};
 
@@ -179,6 +196,7 @@
 			}
 
 			let activeTabTitle = $(Config.EX_INPUT_TITLE).val(),
+				activeTabDesc = $(Config.EX_INPUT_DESC).val(),
 				activeTabUrl = $(Config.EX_INPUT_URL).val(),
 				commitMessage = $(Config.EX_INPUT_COMMENT).val();
 
@@ -189,15 +207,15 @@
 						encodedContent = response.content,
 						decodedContent = decodeURIComponent(escape(window.atob(encodedContent)));
 
-					const dataToAppend = `- [${activeTabTitle}](${activeTabUrl}) \n`;
+					const dataToAppend = `- [${activeTabTitle}](${activeTabUrl})${activeTabDesc ? ` - ${activeTabDesc}` : `.`}\n`;
 
-					// append data in the front
+					// Append data in the front.
 					decodedContent = Repo.appendDataBefore(dataToAppend, decodedContent);
 
-					// decode content
+					// Decode content.
 					encodedContent = window.btoa(unescape(encodeURIComponent(decodedContent)));
 
-					// prepare commit
+					// Prepare commit.
 					return {
 						sha: sha,
 						content: encodedContent,
@@ -225,9 +243,9 @@
 
 						let message = '';
 						if (success.status && success.status === 200) {
-							message = '✅ <a href="' + res.commit.html_url + '" target="_blank">All done!</a>)';
+							message = '✅ <a href="' + res.commit.html_url + '" target="_blank">All done!</a>';
 
-							// close the popup after 5 secs
+							// Close the popup after 5 secs.
 							setTimeout(function () {
 								Helper.closePopup();
 							}, 5000);
@@ -251,23 +269,25 @@
 		 * @returns {String}
 		 */
 		appendDataBefore: function (dataToAppend, content) {
-			// If the file is empty
+			// If the file is empty.
 			if (content.trim().length === 0) {
 				content += '# today-i-liked \nContent that I liked. Saved using https://goo.gl/Wj595G \n';
 			}
+
 			const arr = content.split('###');
-			// if the length of arr is 1, then it is the first time to append data
+
+			// If the length of array is 1, then it is the first time to append data.
 			if (arr.length === 1) {
 				arr[0] += Repo.getDateHeader();
 				arr[0] += dataToAppend;
 				content = arr.join('');
 			} else {
-				// if has not append data of currentDate, then append DateHeader
+				// If has not append data of currentDate, then append DateHeader.
 				if (!Repo.isCurrentDateExists(content)) {
 					arr[0] += Repo.getDateHeader();
 					arr[0] += dataToAppend;
 				} else {
-					// if already have date then append to that
+					// If already have date then append to that.
 					arr[1] += dataToAppend;
 				}
 				content = arr.join('###');
@@ -357,21 +377,25 @@
 			 */
 			loadExtension: function ($container) {
 				appendLikeOnGithubHtml($container);
-				this.bindUI();
+				const desc = Helper.getMetaDescription();
+				this.bindUI(desc);
 			},
 
 			/**
 			 * Binds the UI elements for the extension
 			 */
-			bindUI: function () {
-				// close on escape key
+			bindUI: function (desc) {
+				// Close on escape key.
 				$(document).on('keyup', function (e) {
 					if (e.keyCode === Config.ESCAPE_KEY) {
 						Helper.closePopup();
 					}
+					if (e.keyCode == 13 && e.metaKey) {
+						$(Config.EX_BTN_SAVE).click();
+					}
 				});
 
-				// if clicked outside the popup
+				// If clicked outside the popup.
 				$(document).on('mouseup', function (e) {
 					let container = $(Config.EX_COTAINER);
 
@@ -380,12 +404,12 @@
 					}
 				});
 
-				// hide the switcher on blurring of input
+				// Hide the switcher on blurring of input.
 				$(document).on('click', Config.EX_BTN_CANCEL, function () {
 					Helper.closePopup();
 				});
 
-				// hide the switcher on blurring of input
+				// Hide the switcher on blurring of input.
 				$(document).on('click', Config.EX_BTN_SAVE, function () {
 					let saveBtn = $(Config.EX_BTN_SAVE);
 
@@ -398,26 +422,25 @@
 					saveBtn.addClass('saving').text('Saving...');
 
 					Storage.getRepoUrl(function (items) {
-						// commit the like
+						// Commit the like.
 						if (items) {
 							Repo.commitLike(items);
 						}
 					});
 				});
 
-				// master key binding for which extension will be enabled
+				// Master key binding for which extension will be enabled.
 				key(Config.MASTER_KEY, function () {
 					Helper.showPopup();
 
-					$(Config.EX_INPUT_TITLE).focus();
-
-					// get the active tab
+					$(Config.EX_INPUT_DESC).focus();
+					// Get the active tab.
 					ActiveTab.get(function (activeTab) {
 						if (!activeTab) {
 							return false;
 						}
-
 						$(Config.EX_INPUT_TITLE).val(activeTab.title);
+						$(Config.EX_INPUT_DESC).val(desc);
 						$(Config.EX_INPUT_URL).val(activeTab.url);
 						$(Config.EX_INPUT_COMMENT).val('📦 NEW: ' + activeTab.title);
 					});
