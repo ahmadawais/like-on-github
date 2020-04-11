@@ -205,14 +205,7 @@
 						encodedContent = response.content,
 						decodedContent = decodeURIComponent(escape(window.atob(encodedContent)));
 
-					let finalDesc = activeTabDesc;
-					if (finalDesc[finalDesc.length - 1] === '.') {
-						finalDesc = finalDesc.slice(0, -1);
-					}
-
-					const dataToAppend = `- [${activeTabTitle}](${activeTabUrl})${
-						activeTabDesc ? ` - ${activeTabDesc}.` : `.`
-					}\n`;
+					const dataToAppend = `- [${activeTabTitle}](${activeTabUrl})${activeTabDesc ? ` - ${activeTabDesc}` : `.`}\n`;
 
 					// Append data in the front.
 					decodedContent = Repo.appendDataBefore(dataToAppend, decodedContent);
@@ -392,10 +385,12 @@
 			bindUI: function (desc) {
 				// Close on escape key.
 				$(document).on('keyup', function (e) {
+					e.preventDefault();
 					if (e.keyCode === Config.ESCAPE_KEY) {
 						Helper.closePopup();
 					}
-					if (e.keyCode == 13 && e.metaKey) {
+
+					if (e.keyCode === 13) {
 						$(Config.EX_BTN_SAVE).click();
 					}
 				});
