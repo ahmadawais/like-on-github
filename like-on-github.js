@@ -69,10 +69,9 @@
 		 */
 		isFormValid: function () {
 			let title = $(Config.EX_INPUT_TITLE).val().trim(),
-				desc = $(Config.EX_INPUT_DESC).val().trim(),
-				comment = $(Config.EX_INPUT_COMMENT).val().trim();
+				desc = $(Config.EX_INPUT_DESC).val().trim();
 
-			return !!(title && desc && comment);
+			return !!(title && desc);
 		},
 	};
 
@@ -107,7 +106,6 @@
 		// Templates.
 		MAIN_TEMPLATE: `
 <div class="logh">
-	<h3>Like On Github</h3>
 	<div class="clogl">
 		<div class="lbllogh">Title</div>
 		<input type="text" name="title" />
@@ -207,7 +205,14 @@
 						encodedContent = response.content,
 						decodedContent = decodeURIComponent(escape(window.atob(encodedContent)));
 
-					const dataToAppend = `- [${activeTabTitle}](${activeTabUrl})${activeTabDesc ? ` - ${activeTabDesc}` : `.`}\n`;
+					let finalDesc = activeTabDesc;
+					if (finalDesc[finalDesc.length - 1] === '.') {
+						finalDesc = finalDesc.slice(0, -1);
+					}
+
+					const dataToAppend = `- [${activeTabTitle}](${activeTabUrl})${
+						activeTabDesc ? ` - ${activeTabDesc}.` : `.`
+					}\n`;
 
 					// Append data in the front.
 					decodedContent = Repo.appendDataBefore(dataToAppend, decodedContent);
@@ -219,7 +224,7 @@
 					return {
 						sha: sha,
 						content: encodedContent,
-						message: commitMessage,
+						message: `📦 NEW: ${activeTabTitle}`,
 						committer: {
 							name: items['committer_name'],
 							email: items['committer_email'],
@@ -377,7 +382,7 @@
 			 */
 			loadExtension: function ($container) {
 				appendLikeOnGithubHtml($container);
-				const desc = Helper.getMetaDescription();
+				let desc = Helper.getMetaDescription();
 				this.bindUI(desc);
 			},
 

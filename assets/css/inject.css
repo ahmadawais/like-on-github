@@ -9,14 +9,17 @@
 	width: 22vw;
 	color: #1d2129;
 	background-color: rgb(250, 250, 250);
-	box-shadow: rgba(102, 96, 91, 0.7) 0px 0px 12px;
 	box-sizing: border-box;
 	z-index: 9999999;
 	text-rendering: optimizeLegibility;
-	border: 1px solid rgb(229, 229, 229);
-	border-image: initial;
+	border: none;
 	outline: none;
 	letter-spacing: -0.02em;
+	background: #1e152b;
+	color: #f4f4f4;
+	box-shadow: rgba(0, 0, 0, 0.8) 0px 0px 55px;
+	padding: 2rem;
+	width: 30rem;
 }
 
 .logh h3 {
@@ -70,7 +73,7 @@
 .logh .clogl .lbllogh {
 	font-weight: normal;
 	display: block;
-	color: #1d2129;
+	color: #f4f4f4;
 	font-size: 14px;
 	margin-bottom: 8px;
 	cursor: pointer;
@@ -97,11 +100,11 @@
 
 .logh #action-btns .btn-primary {
 	color: rgb(255, 255, 255);
-	background: rgb(40, 167, 69);
+	background: #16af8a;
 }
 
 .logh #action-btns .btn-primary:hover {
-	background-color: #397d49 !important;
+	background-color: #16af9d !important;
 }
 
 .logh #action-btns .btn:hover {
