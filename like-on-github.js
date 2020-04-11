@@ -112,7 +112,7 @@
 	</div>
 	<div class="clogl">
 		<div class="lbllogh">Description</div>
-		<textarea name="desc"></textarea>
+		<input type="text" name="desc" />
 	</div>
 	<div class="clogl">
 		<input type="hidden" name="comment" />
@@ -133,7 +133,8 @@
 		// References to DOM elements.
 		EX_COTAINER: '.logh',
 		EX_INPUT_TITLE: '.logh input[name="title"]',
-		EX_INPUT_DESC: '.logh textarea[name="desc"]',
+		EX_INPUT_DESC: '.logh input[name="desc"]',
+		// EX_INPUT_DESC: '.logh textarea[name="desc"]',
 		EX_INPUT_URL: '.logh input[name="url"]',
 		EX_INPUT_COMMENT: '.logh textarea[name="comment"]',
 		EX_CONTAINER_BODY: 'body',
